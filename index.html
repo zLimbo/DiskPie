@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DiskPie</title>
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="summary" aria-labelledby="app-title">
+        <div>
+          <p class="eyebrow">Disk usage overview</p>
+          <h1 id="app-title">DiskPie</h1>
+        </div>
+        <div class="summary-stats" aria-label="Current scan summary">
+          <span id="total-size">0 B</span>
+          <small>Sample data</small>
+        </div>
+      </section>
+
+      <section class="workspace" aria-label="Disk usage chart and details">
+        <div class="chart-panel">
+          <svg
+            id="usage-chart"
+            class="usage-chart"
+            viewBox="0 0 240 240"
+            role="img"
+            aria-label="Pie chart of sample disk usage"
+          ></svg>
+          <div class="chart-center" aria-hidden="true">
+            <strong id="center-total">0 B</strong>
+            <span>Total</span>
+          </div>
+        </div>
+
+        <div class="details-panel">
+          <div class="panel-header">
+            <h2>Largest Items</h2>
+            <span id="item-count">0 items</span>
+          </div>
+          <ol id="usage-list" class="usage-list"></ol>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
+

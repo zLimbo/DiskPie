@@ -32,7 +32,7 @@ background workers, deletion tools, or polished packaging.
 
 ### Phase 0: Project Foundation
 
-Status: planned
+Status: completed
 
 Tasks:
 
@@ -50,7 +50,7 @@ Exit criteria:
 
 ### Phase 1: Static Data Pie Demo
 
-Status: planned
+Status: completed
 
 Purpose:
 
@@ -179,12 +179,21 @@ Exit criteria:
 
 The first version should favor speed of learning and small commits.
 
-Preferred starting stack:
+Preferred target stack:
 
 1. Frontend: Vite + React + TypeScript.
 2. Charting: start with a lightweight chart library or simple SVG pie chart.
 3. Scanner: Node.js filesystem APIs for the first local demo.
 4. Desktop packaging later: Electron or Tauri, decided after the web demo works.
+
+Current Phase 1 implementation:
+
+1. Zero-dependency HTML, CSS, and JavaScript.
+2. A small Node.js static file server.
+3. No package manager requirement yet, because the current environment has
+   `node` but not `npm`.
+4. Migration to Vite + React + TypeScript remains the preferred next frontend
+   structure once package management is available.
 
 Reasons:
 
@@ -275,10 +284,10 @@ tree, sunburst, or drilldown view later.
 
 ## Near-Term Checklist
 
-1. Create initial commit with documentation.
-2. Scaffold Vite + React + TypeScript app.
-3. Render hard-coded sample data as a pie chart.
-4. Add size formatting utility.
-5. Add first manual verification screenshot.
+1. Create initial commit with documentation. Done.
+2. Build a zero-dependency static pie demo. Done.
+3. Render hard-coded sample data as a pie chart. Done.
+4. Add size formatting utility. Done.
+5. Verify local server responds. Done.
 6. Commit the static demo.
-
+7. Start Phase 2 by designing the scanner boundary.
