@@ -15,9 +15,31 @@
         </div>
         <div class="summary-stats" aria-label="Current scan summary">
           <span id="total-size">0 B</span>
-          <small>Sample data</small>
+          <small id="scan-label">Ready to scan</small>
         </div>
       </section>
+
+      <form id="scan-form" class="scan-form">
+        <label for="scan-path">Folder path</label>
+        <div class="scan-controls">
+          <input
+            id="scan-path"
+            name="path"
+            type="text"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="/mnt/d/dev/DiskPie"
+          />
+          <button id="choose-button" class="secondary-button" type="button" hidden>Choose</button>
+          <button id="scan-button" type="submit">Scan</button>
+          <button id="cancel-button" class="secondary-button" type="button" hidden>Cancel</button>
+        </div>
+      </form>
+
+      <nav class="path-nav" aria-label="Current folder navigation">
+        <button id="parent-button" type="button">Up</button>
+        <ol id="breadcrumb-list" class="breadcrumb-list"></ol>
+      </nav>
 
       <section class="workspace" aria-label="Disk usage chart and details">
         <div class="chart-panel">
@@ -39,7 +61,9 @@
             <h2>Largest Items</h2>
             <span id="item-count">0 items</span>
           </div>
+          <p id="status-message" class="status-message" role="status"></p>
           <ol id="usage-list" class="usage-list"></ol>
+          <ul id="warning-list" class="warning-list" aria-label="Scan warnings"></ul>
         </div>
       </section>
     </main>
@@ -47,4 +71,3 @@
     <script type="module" src="./src/main.js"></script>
   </body>
 </html>
-

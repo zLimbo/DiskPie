@@ -1,0 +1,49 @@
+{
+  "name": "diskpie",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "native/main.mjs",
+  "scripts": {
+    "start": "node scripts/serve.mjs",
+    "native": "electron .",
+    "test": "node --test scripts/scanner.test.mjs",
+    "check": "node --check scripts/scanner.mjs && node --check scripts/serve.mjs && node --check scripts/scanner.test.mjs && node --check native/main.mjs && node --check src/main.js",
+    "dist:win": "electron-builder --win portable",
+    "dist:win:dir": "electron-builder --win dir"
+  },
+  "devDependencies": {
+    "electron": "^31.7.7",
+    "electron-builder": "^24.13.3"
+  },
+  "description": "A native disk usage visualizer for local folders.",
+  "author": "DiskPie",
+  "build": {
+    "appId": "dev.diskpie.app",
+    "productName": "DiskPie",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "index.html",
+      "src/**/*",
+      "scripts/scanner.mjs",
+      "native/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "signAndEditExecutable": false
+    },
+    "portable": {
+      "artifactName": "${productName}-${version}-windows-${arch}-portable.${ext}"
+    }
+  }
+}
