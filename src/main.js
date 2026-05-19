@@ -396,13 +396,49 @@ function renderBreadcrumbs(path) {
 }
 
 function renderWarnings(warnings) {
-  warningList.replaceChildren(
-    ...warnings.map((warning) => {
-      const item = document.createElement("li");
-      item.textContent = `${warning.path}: ${warning.message}`;
-      return item;
-    }),
-  );
+  warningList.replaceChildren();
+
+  if (warnings.length === 0) {
+    return;
+  }
+
+  const warningSummary = summarizeWarnings(warnings);
+  const item = document.createElement("li");
+  const details = document.createElement("details");
+  const summary = document.createElement("summary");
+  const detailList = document.createElement("ul");
+
+  summary.textContent = `Skipped ${warnings.length} system or locked ${warnings.length === 1 ? "item" : "items"}. ${warningSummary}`;
+
+  warnings.slice(0, 8).forEach((warning) => {
+    const detail = document.createElement("li");
+    detail.textContent = `${warning.path}: ${warning.message}`;
+    detailList.append(detail);
+  });
+
+  if (warnings.length > 8) {
+    const detail = document.createElement("li");
+    detail.textContent = `${warnings.length - 8} more warnings hidden.`;
+    detailList.append(detail);
+  }
+
+  details.append(summary, detailList);
+  item.append(details);
+  warningList.append(item);
+}
+
+function summarizeWarnings(warnings) {
+  const counts = new Map();
+
+  warnings.forEach((warning) => {
+    const code = warning.message.match(/\b[A-Z][A-Z0-9_]+\b/)?.[0] || "WARN";
+    counts.set(code, (counts.get(code) || 0) + 1);
+  });
+
+  return [...counts.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .map(([code, count]) => `${code}: ${count}`)
+    .join(", ");
 }
 
 function getBreadcrumbs(path) {

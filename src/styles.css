@@ -356,13 +356,34 @@ h2 {
   gap: 8px;
   margin: 10px 0 0;
   padding: 0;
-  color: #9a3412;
-  font-size: 0.82rem;
+  color: #7c4a03;
+  font-size: 0.78rem;
   list-style: none;
 }
 
-.warning-list li {
+.warning-list > li {
+  border: 1px solid #f3d08a;
+  border-radius: 8px;
+  padding: 8px;
+  background: #fff8e8;
+}
+
+.warning-list summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.warning-list ul {
+  display: grid;
+  gap: 6px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.warning-list li li {
   overflow-wrap: anywhere;
+  color: #8a5a12;
 }
 
 @media (max-width: 980px) {
