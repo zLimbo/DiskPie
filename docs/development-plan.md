@@ -71,7 +71,7 @@ Exit criteria:
 
 ### Phase 2: Real Directory Scan
 
-Status: planned
+Status: completed
 
 Purpose:
 
@@ -91,9 +91,16 @@ Exit criteria:
 2. Permission errors are reported as warnings.
 3. UI can render real scan output.
 
+Current Phase 2 implementation:
+
+1. The Node.js demo server exposes a read-only `/api/scan` endpoint.
+2. The scanner recursively totals each immediate child of the requested folder.
+3. The UI accepts a folder path, renders real scan output, and shows warnings.
+4. Smaller entries are grouped into "Other" after the largest visible items.
+
 ### Phase 3: Navigation and Drilldown
 
-Status: planned
+Status: completed
 
 Purpose:
 
@@ -111,9 +118,16 @@ Exit criteria:
 1. User can start at a root folder and inspect nested folders.
 2. Breadcrumbs always match the currently displayed folder.
 
+Current Phase 3 implementation:
+
+1. Directory rows and chart segments can be opened with click, Enter, or Space.
+2. Breadcrumb buttons let users jump back to any parent folder.
+3. The Up button loads the current folder parent.
+4. Files and grouped "Other" entries remain read-only display items.
+
 ### Phase 4: Performance and Large Folders
 
-Status: planned
+Status: completed
 
 Purpose:
 
@@ -133,9 +147,23 @@ Exit criteria:
 2. User can cancel an active scan.
 3. Tests cover basic scanner correctness.
 
+Current Phase 4 implementation:
+
+1. Scanner behavior lives in `scripts/scanner.mjs`, separate from the HTTP server.
+2. The server exposes `/api/scan-stream` using Server-Sent Events.
+3. Progress events report completed top-level items, visited entries, and warnings.
+4. The scanner yields during recursion so the server can keep responding.
+5. The client can cancel active scans with `AbortController`.
+6. Fixture tests cover empty folders, recursive totals, progress, grouping,
+   warnings, cancellation, and non-directory errors.
+
+Remaining Phase 4 follow-up:
+
+1. Consider worker threads for very large disks after the product shape settles.
+
 ### Phase 5: Native Desktop Experience
 
-Status: planned
+Status: completed
 
 Purpose:
 
@@ -153,6 +181,13 @@ Exit criteria:
 
 1. User can choose a folder without editing config.
 2. App can be launched like a normal desktop app.
+
+Current Phase 5 implementation:
+
+1. Electron loads the existing DiskPie UI as a native desktop window.
+2. A preload bridge exposes folder picking, scan start, scan cancel, and scan events.
+3. The renderer uses native IPC when available and keeps the web/SSE path as fallback.
+4. Directory scanning reuses `scripts/scanner.mjs`; no duplicate scanner logic exists.
 
 ### Phase 6: Advanced Visualization
 
