@@ -8,9 +8,10 @@
     "start": "node scripts/serve.mjs",
     "native": "electron .",
     "test": "node --test scripts/scanner.test.mjs",
-    "check": "node --check scripts/scanner.mjs && node --check scripts/serve.mjs && node --check scripts/scanner.test.mjs && node --check native/main.mjs && node --check src/main.js",
+    "check": "node --check scripts/scanner.mjs && node --check scripts/serve.mjs && node --check scripts/scanner.test.mjs && node --check scripts/benchmark-scan.mjs && node --check native/main.mjs && node --check src/main.js",
     "dist:win": "electron-builder --win portable",
-    "dist:win:dir": "electron-builder --win dir"
+    "dist:win:dir": "electron-builder --win dir",
+    "bench:scan": "node scripts/benchmark-scan.mjs"
   },
   "devDependencies": {
     "electron": "^31.7.7",

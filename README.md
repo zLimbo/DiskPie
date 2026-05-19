@@ -87,6 +87,24 @@ npm test
 
 The scanner tests cover empty folders, nested size aggregation, progress events, `Other` grouping, unreadable-path warnings, cancellation, and non-directory errors.
 
+## Performance Tuning
+
+DiskPie scans with bounded filesystem concurrency. The default is chosen from CPU parallelism and capped to avoid overwhelming slower disks. On Windows 11, NVMe drives may benefit from a higher value, while HDDs or network drives may need a lower one.
+
+Run a quick benchmark:
+
+```bash
+npm run bench:scan -- "C:\\Users\\YourName"
+```
+
+Override concurrency for testing:
+
+```bash
+DISKPIE_SCAN_CONCURRENCY=128 npm run bench:scan -- "C:\\Users\\YourName"
+```
+
+For normal app runs, set `DISKPIE_SCAN_CONCURRENCY` before launching `npm run native` if you need to tune a specific machine.
+
 ## Project Structure
 
 ```text

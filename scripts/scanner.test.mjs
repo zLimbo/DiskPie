@@ -82,7 +82,9 @@ test("groupSmallItems keeps the largest entries and combines the rest", () => {
   assert.equal(grouped[3].sizeBytes, 1 + 2 + 3);
 });
 
-test("scanDirectory records unreadable folders as warnings", async () => {
+test("scanDirectory records unreadable folders as warnings", {
+  skip: process.platform === "win32" ? "chmod-based unreadable fixtures are not reliable on Windows" : false,
+}, async () => {
   await withFixture(async (root) => {
     const locked = join(root, "locked");
 
