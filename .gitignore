@@ -3,3 +3,4 @@ dist/
 *.log
 release/
 release-latest/
+release-*/
