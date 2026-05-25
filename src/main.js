@@ -16,6 +16,7 @@ const chooseButton = document.querySelector("#choose-button");
 const cancelButton = document.querySelector("#cancel-button");
 const parentButton = document.querySelector("#parent-button");
 const exportBtn = document.querySelector("#export-button");
+const tooltipEl = document.querySelector("#tooltip");
 
 let currentRoot = "";
 let activeScanController = null;
@@ -352,6 +353,8 @@ function renderPieChart(items, total) {
         title.textContent = `${item.name} - ${formatBytes(item.sizeBytes)}`;
         path.appendChild(title);
 
+        attachTooltip(path, item, total);
+
         startAngle = endAngle;
         return path;
       }),
@@ -413,6 +416,64 @@ function exportScan() {
   a.download = `diskpie-${lastScan.root.replace(/[\\/:\s]+/g, "-")}.json`;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+function attachTooltip(element, item, total) {
+  element.addEventListener("mouseenter", (event) => {
+    showTooltip(event, item, total);
+  });
+  element.addEventListener("mousemove", (event) => {
+    positionTooltip(event);
+  });
+  element.addEventListener("mouseleave", hideTooltip);
+  element.addEventListener("focus", (event) => {
+    showTooltip(event, item, total, true);
+  });
+  element.addEventListener("blur", hideTooltip);
+}
+
+function showTooltip(event, item, total, isFocus) {
+  tooltipEl.innerHTML = `
+    <div class="tooltip-name">${escapeHtml(item.name)}</div>
+    <div class="tooltip-path">${escapeHtml(item.path)}</div>
+    <div class="tooltip-size">${formatBytes(item.sizeBytes)} (${formatPercent(item.sizeBytes, total)})</div>
+    <div class="tooltip-type">${item.type === "directory" ? "Directory" : "File"}</div>
+  `;
+  tooltipEl.hidden = false;
+
+  if (!isFocus) {
+    positionTooltip(event);
+  } else {
+    // For focus events, position below the focused element
+    const rect = event.target.getBoundingClientRect();
+    const parentRect = tooltipEl.parentElement.getBoundingClientRect();
+    tooltipEl.style.left = `${Math.min(rect.left - parentRect.left, parentRect.width - 300)}px`;
+    tooltipEl.style.top = `${rect.bottom - parentRect.top + 8}px`;
+  }
+}
+
+function positionTooltip(event) {
+  const parentRect = tooltipEl.parentElement.getBoundingClientRect();
+  let left = event.clientX - parentRect.left + 12;
+  let top = event.clientY - parentRect.top - 10;
+
+  // Keep tooltip within the chart panel
+  const tooltipWidth = 280;
+  const tooltipHeight = tooltipEl.offsetHeight || 80;
+  if (left + tooltipWidth > parentRect.width - 8) {
+    left = event.clientX - parentRect.left - tooltipWidth - 12;
+  }
+  if (top + tooltipHeight > parentRect.height - 8) {
+    top = event.clientY - parentRect.top - tooltipHeight - 10;
+  }
+  if (top < 0) top = 8;
+
+  tooltipEl.style.left = `${Math.max(4, left)}px`;
+  tooltipEl.style.top = `${Math.max(4, top)}px`;
+}
+
+function hideTooltip() {
+  tooltipEl.hidden = true;
 }
 
 function drillTo(path) {

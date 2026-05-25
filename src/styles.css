@@ -197,6 +197,56 @@ h2 {
   color: #667085;
 }
 
+.tooltip {
+  position: absolute;
+  z-index: 10;
+  display: none;
+  min-width: 160px;
+  max-width: 280px;
+  border: 1px solid #d8dde6;
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #ffffff;
+  box-shadow: 0 8px 20px rgba(31, 41, 51, 0.14);
+  pointer-events: none;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.tooltip[hidden] {
+  display: none;
+}
+
+.tooltip:not([hidden]) {
+  display: block;
+}
+
+.tooltip-name {
+  font-weight: 700;
+  color: #1f2933;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tooltip-path {
+  color: #667085;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tooltip-size {
+  margin-top: 4px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.tooltip-type {
+  color: #667085;
+  font-size: 0.76rem;
+}
+
 .export-button {
   min-height: 30px;
   border: 1px solid #cfd6e0;
