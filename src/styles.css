@@ -244,6 +244,67 @@ h2 {
   font-weight: 700;
 }
 
+.view-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 10px;
+}
+
+.view-tab {
+  min-height: 32px;
+  border: 1px solid #cfd6e0;
+  padding: 0 14px;
+  color: #667085;
+  background: #ffffff;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.view-tab:first-child {
+  border-radius: 8px 0 0 8px;
+}
+
+.view-tab:last-child {
+  border-radius: 0 8px 8px 0;
+  border-left: 0;
+}
+
+.view-tab.is-active {
+  color: #ffffff;
+  background: #1f2933;
+  border-color: #1f2933;
+  cursor: default;
+}
+
+.view-tab:not(.is-active):hover {
+  color: #1f2933;
+  background: #f0f2f5;
+}
+
+.treemap-chart {
+  width: min(100%, 660px, calc(72vh - 96px));
+  aspect-ratio: 1;
+  filter: drop-shadow(0 16px 22px rgba(31, 41, 51, 0.14));
+}
+
+.treemap-chart rect {
+  cursor: default;
+  transition: filter 160ms ease, opacity 160ms ease;
+}
+
+.treemap-chart rect.is-drillable {
+  cursor: pointer;
+}
+
+.treemap-chart rect:hover,
+.treemap-chart rect:focus-visible {
+  filter: brightness(1.06);
+  outline: none;
+  opacity: 0.92;
+}
+
 .tooltip {
   position: absolute;
   z-index: 10;

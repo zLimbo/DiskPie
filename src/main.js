@@ -4,6 +4,7 @@ const filePalette = ["#2f9e74", "#4ab88a", "#1f7a56", "#6bcf9e", "#166342", "#52
 const nativeApi = window.diskPie;
 
 const chart = document.querySelector("#usage-chart");
+const treemapChart = document.querySelector("#treemap-chart");
 const list = document.querySelector("#usage-list");
 const warningList = document.querySelector("#warning-list");
 const totalSize = document.querySelector("#total-size");
@@ -19,6 +20,9 @@ const cancelButton = document.querySelector("#cancel-button");
 const parentButton = document.querySelector("#parent-button");
 const exportBtn = document.querySelector("#export-button");
 const tooltipEl = document.querySelector("#tooltip");
+const viewPieBtn = document.querySelector("#view-pie");
+const viewTreemapBtn = document.querySelector("#view-treemap");
+const filterInput = document.querySelector("#filter-input");
 const colorModeCheckbox = document.querySelector("#color-mode-checkbox");
 
 let currentRoot = "";
@@ -26,6 +30,7 @@ let activeScanController = null;
 let activeNativeScanId = null;
 let scanSequence = 0;
 
+let activeView = "pie";
 let lastScan = null;
 let lastScanItems = null;
 
@@ -70,6 +75,11 @@ parentButton.addEventListener("click", () => {
 });
 
 exportBtn.addEventListener("click", exportScan);
+
+viewPieBtn.addEventListener("click", () => switchView("pie"));
+viewTreemapBtn.addEventListener("click", () => switchView("treemap"));
+
+filterInput.addEventListener("input", () => applyFilter());
 
 colorModeCheckbox.addEventListener("change", () => {
   if (lastScan) renderCurrentView();
@@ -227,6 +237,9 @@ function setLoading(path) {
   centerTotal.textContent = "0 B";
   itemCount.textContent = "0 items";
   chart.replaceChildren();
+  treemapChart.replaceChildren();
+  treemapChart.hidden = true;
+  chart.hidden = false;
   list.replaceChildren();
   warningList.replaceChildren();
 }
@@ -261,11 +274,24 @@ function renderScan(scan) {
   scanLabel.textContent = scan.root;
   renderBreadcrumbs(scan.root);
 
+  filterInput.value = "";
   renderCurrentView();
   renderWarnings(scan.warnings);
 
   exportBtn.hidden = false;
   exportBtn.disabled = false;
+}
+
+function switchView(view) {
+  if (view === activeView) return;
+  activeView = view;
+
+  viewPieBtn.classList.toggle("is-active", view === "pie");
+  viewPieBtn.setAttribute("aria-selected", view === "pie");
+  viewTreemapBtn.classList.toggle("is-active", view === "treemap");
+  viewTreemapBtn.setAttribute("aria-selected", view === "treemap");
+
+  if (lastScan) renderCurrentView();
 }
 
 function getCurrentPalette() {
@@ -285,7 +311,10 @@ function pickColor(index, itemType) {
 function renderCurrentView() {
   if (!lastScan) return;
 
-  const rawItems = lastScanItems;
+  const filterText = filterInput.value.trim().toLowerCase();
+  const rawItems = filterText
+    ? lastScanItems.filter((item) => item.name.toLowerCase().includes(filterText) || item.path.toLowerCase().includes(filterText))
+    : lastScanItems;
   const total = rawItems.reduce((sum, item) => sum + item.sizeBytes, 0);
   const items = rawItems.map((item, index) => ({
     ...item,
@@ -294,17 +323,26 @@ function renderCurrentView() {
 
   itemCount.textContent = `${items.length} ${items.length === 1 ? "item" : "items"}`;
 
+  chart.hidden = activeView !== "pie";
+  treemapChart.hidden = activeView !== "treemap";
+
   if (items.length === 0) {
-    statusMessage.textContent = "This folder is empty.";
+    statusMessage.textContent = filterText ? "No items match the filter." : "This folder is empty.";
     chart.replaceChildren();
+    treemapChart.replaceChildren();
     list.replaceChildren();
   } else if (total === 0) {
-    statusMessage.textContent = "No readable file data was found in this folder.";
+    statusMessage.textContent = filterText ? "No readable file data matches the filter." : "No readable file data was found in this folder.";
     chart.replaceChildren();
+    treemapChart.replaceChildren();
     renderUsageList(items, 1);
   } else {
     statusMessage.textContent = "";
-    renderPieChart(items, total);
+    if (activeView === "pie") {
+      renderPieChart(items, total);
+    } else {
+      renderTreemap(items, total);
+    }
     renderUsageList(items, total);
   }
 }
@@ -317,6 +355,7 @@ function renderCanceled() {
   centerTotal.textContent = "0 B";
   itemCount.textContent = "0 items";
   chart.replaceChildren();
+  treemapChart.replaceChildren();
   list.replaceChildren();
   warningList.replaceChildren();
   exportBtn.hidden = true;
@@ -331,6 +370,7 @@ function renderError(message) {
   centerTotal.textContent = "0 B";
   itemCount.textContent = "0 items";
   chart.replaceChildren();
+  treemapChart.replaceChildren();
   list.replaceChildren();
   warningList.replaceChildren();
   exportBtn.hidden = true;
@@ -380,6 +420,128 @@ function renderPieChart(items, total) {
         return path;
       }),
   );
+}
+
+function renderTreemap(items, total) {
+  const viewWidth = 240;
+  const viewHeight = 240;
+  const rects = squarify(items.filter((item) => item.sizeBytes > 0), viewWidth, viewHeight);
+
+  treemapChart.replaceChildren(
+    ...rects.map((rect) => {
+      const svgRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+      const item = rect.item;
+      const canDrillDown = item.type === "directory";
+
+      svgRect.setAttribute("x", rect.x);
+      svgRect.setAttribute("y", rect.y);
+      svgRect.setAttribute("width", rect.width);
+      svgRect.setAttribute("height", rect.height);
+      svgRect.setAttribute("fill", item.color);
+      svgRect.setAttribute("stroke", "#ffffff");
+      svgRect.setAttribute("stroke-width", "2");
+      svgRect.setAttribute("tabindex", canDrillDown ? "0" : "-1");
+      svgRect.classList.toggle("is-drillable", canDrillDown);
+      svgRect.setAttribute(
+        "aria-label",
+        `${item.name}: ${formatBytes(item.sizeBytes)}, ${formatPercent(item.sizeBytes, total)}`,
+      );
+
+      if (canDrillDown) {
+        svgRect.setAttribute("role", "button");
+        svgRect.addEventListener("click", () => drillTo(item.path));
+        svgRect.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            drillTo(item.path);
+          }
+        });
+      }
+
+      const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+      title.textContent = `${item.name} - ${formatBytes(item.sizeBytes)}`;
+      svgRect.appendChild(title);
+
+      attachTooltip(svgRect, item, total);
+
+      return svgRect;
+    }),
+  );
+}
+
+// Squarified treemap layout (Bruls, Huizing, van Wijk algorithm)
+// Returns [{ item, x, y, width, height }] for the given viewport size.
+function squarify(items, width, height) {
+  const sorted = [...items].sort((a, b) => b.sizeBytes - a.sizeBytes);
+  const totalSize = sorted.reduce((sum, i) => sum + i.sizeBytes, 0);
+  const result = [];
+  if (totalSize === 0 || sorted.length === 0) return result;
+
+  // Normalise to area * width * height
+  const nodes = sorted.map((item) => ({
+    item,
+    area: Math.max(0, (item.sizeBytes / totalSize) * width * height),
+  }));
+
+  const rows = squarifyLayout(nodes, [], width, height);
+  let xOff = 0, yOff = 0;
+
+  for (const row of rows) {
+    const rowArea = row.reduce((s, n) => s + n.area, 0);
+    let rowW, rowH;
+
+    if (width <= height) {
+      rowW = rowArea / height;
+      rowH = height;
+      let curY = 0;
+      for (const n of row) {
+        const h = n.area / rowW;
+        result.push({ item: n.item, x: xOff, y: yOff + curY, width: rowW, height: h });
+        curY += h;
+      }
+      xOff += rowW;
+      width -= rowW;
+    } else {
+      rowH = rowArea / width;
+      rowW = width;
+      let curX = 0;
+      for (const n of row) {
+        const w = n.area / rowH;
+        result.push({ item: n.item, x: xOff + curX, y: yOff, width: w, height: rowH });
+        curX += w;
+      }
+      yOff += rowH;
+      height -= rowH;
+    }
+  }
+
+  return result;
+}
+
+function squarifyLayout(nodes, row, w, h) {
+  if (nodes.length === 0) return row.length ? [row] : [];
+
+  const shortSide = Math.min(w, h);
+  const candidate = nodes[0];
+  const testRow = [...row, candidate];
+  const rowArea = testRow.reduce((s, n) => s + n.area, 0);
+  const rowLen = rowArea / shortSide;
+
+  if (row.length === 0 || worstAspect(testRow, rowLen) <= worstAspect(row, rowArea / shortSide)) {
+    return squarifyLayout(nodes.slice(1), testRow, w, h);
+  }
+
+  return [row, ...squarifyLayout(nodes, [], w, h)];
+}
+
+function worstAspect(row, rowLen) {
+  let worst = 0;
+  for (const n of row) {
+    const d = n.area / rowLen;
+    const r = Math.max(rowLen / d, d / rowLen);
+    if (r > worst) worst = r;
+  }
+  return worst;
 }
 
 function renderUsageList(items, total) {
@@ -437,6 +599,11 @@ function exportScan() {
   a.download = `diskpie-${lastScan.root.replace(/[\\/:\s]+/g, "-")}.json`;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+function applyFilter() {
+  if (!lastScan) return;
+  renderCurrentView();
 }
 
 function attachTooltip(element, item, total) {

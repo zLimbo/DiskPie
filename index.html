@@ -42,6 +42,11 @@
         <ol id="breadcrumb-list" class="breadcrumb-list"></ol>
       </nav>
 
+      <div class="view-tabs" role="tablist" aria-label="Chart view">
+        <button id="view-pie" class="view-tab is-active" role="tab" aria-selected="true">Pie</button>
+        <button id="view-treemap" class="view-tab" role="tab" aria-selected="false">Treemap</button>
+      </div>
+
       <section class="workspace" aria-label="Disk usage chart and details">
         <div class="chart-panel">
           <svg
@@ -49,7 +54,15 @@
             class="usage-chart"
             viewBox="0 0 240 240"
             role="img"
-            aria-label="Pie chart of sample disk usage"
+            aria-label="Pie chart of disk usage"
+          ></svg>
+          <svg
+            id="treemap-chart"
+            class="treemap-chart"
+            viewBox="0 0 240 240"
+            role="img"
+            aria-label="Treemap of disk usage"
+            hidden
           ></svg>
           <div class="chart-center" aria-hidden="true">
             <strong id="center-total">0 B</strong>
