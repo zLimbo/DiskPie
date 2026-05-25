@@ -22,6 +22,9 @@ let activeScanController = null;
 let activeNativeScanId = null;
 let scanSequence = 0;
 
+let lastScan = null;
+let lastScanItems = null;
+
 if (nativeApi?.isNative) {
   chooseButton.hidden = false;
   nativeApi.onScanEvent((message) => handleScanEvent(message, message.scanId));
@@ -238,37 +241,50 @@ function renderProgress(progress) {
 }
 
 function renderScan(scan) {
-  const items = scan.items.map((item, index) => ({
-    ...item,
-    color: palette[index % palette.length],
-  }));
+  lastScan = scan;
+  lastScanItems = scan.items;
 
   currentRoot = scan.root;
   scanPath.value = scan.root;
   totalSize.textContent = formatBytes(scan.totalBytes);
   centerTotal.textContent = formatBytes(scan.totalBytes);
-  itemCount.textContent = `${items.length} ${items.length === 1 ? "item" : "items"}`;
   scanLabel.textContent = scan.root;
   renderBreadcrumbs(scan.root);
+
+  renderCurrentView();
+  renderWarnings(scan.warnings);
+}
+
+function renderCurrentView() {
+  if (!lastScan) return;
+
+  const rawItems = lastScanItems;
+  const total = rawItems.reduce((sum, item) => sum + item.sizeBytes, 0);
+  const items = rawItems.map((item, index) => ({
+    ...item,
+    color: palette[index % palette.length],
+  }));
+
+  itemCount.textContent = `${items.length} ${items.length === 1 ? "item" : "items"}`;
 
   if (items.length === 0) {
     statusMessage.textContent = "This folder is empty.";
     chart.replaceChildren();
     list.replaceChildren();
-  } else if (scan.totalBytes === 0) {
+  } else if (total === 0) {
     statusMessage.textContent = "No readable file data was found in this folder.";
     chart.replaceChildren();
     renderUsageList(items, 1);
   } else {
     statusMessage.textContent = "";
-    renderPieChart(items, scan.totalBytes);
-    renderUsageList(items, scan.totalBytes);
+    renderPieChart(items, total);
+    renderUsageList(items, total);
   }
-
-  renderWarnings(scan.warnings);
 }
 
 function renderCanceled() {
+  lastScan = null;
+  lastScanItems = null;
   statusMessage.textContent = "Scan canceled.";
   totalSize.textContent = "0 B";
   centerTotal.textContent = "0 B";
@@ -279,6 +295,8 @@ function renderCanceled() {
 }
 
 function renderError(message) {
+  lastScan = null;
+  lastScanItems = null;
   scanLabel.textContent = "Scan failed";
   statusMessage.textContent = message;
   totalSize.textContent = "0 B";
@@ -314,11 +332,11 @@ function renderPieChart(items, total) {
 
         if (canDrillDown) {
           path.setAttribute("role", "button");
-          path.addEventListener("click", () => loadScan(item.path));
+          path.addEventListener("click", () => drillTo(item.path));
           path.addEventListener("keydown", (event) => {
             if (event.key === "Enter" || event.key === " ") {
               event.preventDefault();
-              loadScan(item.path);
+              drillTo(item.path);
             }
           });
         }
@@ -357,11 +375,11 @@ function renderUsageList(items, total) {
         row.tabIndex = 0;
         row.setAttribute("role", "button");
         row.setAttribute("aria-label", `Open ${item.path}`);
-        row.addEventListener("click", () => loadScan(item.path));
+        row.addEventListener("click", () => drillTo(item.path));
         row.addEventListener("keydown", (event) => {
           if (event.key === "Enter" || event.key === " ") {
             event.preventDefault();
-            loadScan(item.path);
+            drillTo(item.path);
           }
         });
       }
@@ -369,6 +387,10 @@ function renderUsageList(items, total) {
       return row;
     }),
   );
+}
+
+function drillTo(path) {
+  loadScan(path);
 }
 
 function renderBreadcrumbs(path) {
