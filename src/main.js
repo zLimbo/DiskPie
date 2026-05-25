@@ -15,7 +15,7 @@ const scanButton = document.querySelector("#scan-button");
 const chooseButton = document.querySelector("#choose-button");
 const cancelButton = document.querySelector("#cancel-button");
 const parentButton = document.querySelector("#parent-button");
-const breadcrumbList = document.querySelector("#breadcrumb-list");
+const exportBtn = document.querySelector("#export-button");
 
 let currentRoot = "";
 let activeScanController = null;
@@ -64,6 +64,8 @@ parentButton.addEventListener("click", () => {
     loadScan(parentPath);
   }
 });
+
+exportBtn.addEventListener("click", exportScan);
 
 if (nativeApi?.isNative) {
   statusMessage.textContent = "Choose a folder to scan.";
@@ -253,6 +255,9 @@ function renderScan(scan) {
 
   renderCurrentView();
   renderWarnings(scan.warnings);
+
+  exportBtn.hidden = false;
+  exportBtn.disabled = false;
 }
 
 function renderCurrentView() {
@@ -292,6 +297,7 @@ function renderCanceled() {
   chart.replaceChildren();
   list.replaceChildren();
   warningList.replaceChildren();
+  exportBtn.hidden = true;
 }
 
 function renderError(message) {
@@ -305,6 +311,7 @@ function renderError(message) {
   chart.replaceChildren();
   list.replaceChildren();
   warningList.replaceChildren();
+  exportBtn.hidden = true;
 }
 
 function renderPieChart(items, total) {
@@ -387,6 +394,25 @@ function renderUsageList(items, total) {
       return row;
     }),
   );
+}
+
+function exportScan() {
+  if (!lastScan) return;
+
+  const data = JSON.stringify({
+    root: lastScan.root,
+    totalBytes: lastScan.totalBytes,
+    items: lastScanItems,
+    warnings: lastScan.warnings,
+  }, null, 2);
+
+  const blob = new Blob([data], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `diskpie-${lastScan.root.replace(/[\\/:\s]+/g, "-")}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 function drillTo(path) {

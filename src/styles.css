@@ -170,9 +170,13 @@ h2 {
 }
 
 .summary-stats {
-  display: grid;
-  gap: 4px;
-  justify-items: end;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.summary-stats > :nth-child(2) {
+  margin-right: auto;
 }
 
 .summary-stats span,
@@ -191,6 +195,29 @@ h2 {
 .panel-header span,
 .usage-row small {
   color: #667085;
+}
+
+.export-button {
+  min-height: 30px;
+  border: 1px solid #cfd6e0;
+  border-radius: 8px;
+  padding: 0 10px;
+  color: #1f2933;
+  background: #ffffff;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.export-button:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.export-button:not(:disabled):hover {
+  border-color: #b8c4d4;
+  background: #f6f7f9;
 }
 
 .workspace {
@@ -403,7 +430,7 @@ h2 {
   }
 
   .summary-stats {
-    justify-items: start;
+    flex-wrap: wrap;
   }
 
   .scan-controls {
@@ -418,12 +445,20 @@ h2 {
     min-height: 420px;
   }
 
-  .usage-chart {
+  .usage-chart,
+  .treemap-chart {
     width: min(100%, 460px);
   }
 
   .details-panel {
     max-height: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .summary-stats {
+    flex-wrap: wrap;
+    justify-items: start;
   }
 }
 
