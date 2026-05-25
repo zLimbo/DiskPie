@@ -1,4 +1,6 @@
 const palette = ["#3178c6", "#2f9e74", "#d9480f", "#7048e8", "#c2255c", "#0b7285", "#5c940d", "#868e96"];
+const dirPalette = ["#3178c6", "#4a8fd4", "#1f5f9e", "#6ba3e0", "#1a4d7a", "#5c94c8", "#2e6fa8", "#87b8e8"];
+const filePalette = ["#2f9e74", "#4ab88a", "#1f7a56", "#6bcf9e", "#166342", "#52b888", "#2a8f66", "#87dbae"];
 const nativeApi = window.diskPie;
 
 const chart = document.querySelector("#usage-chart");
@@ -17,6 +19,7 @@ const cancelButton = document.querySelector("#cancel-button");
 const parentButton = document.querySelector("#parent-button");
 const exportBtn = document.querySelector("#export-button");
 const tooltipEl = document.querySelector("#tooltip");
+const colorModeCheckbox = document.querySelector("#color-mode-checkbox");
 
 let currentRoot = "";
 let activeScanController = null;
@@ -67,6 +70,10 @@ parentButton.addEventListener("click", () => {
 });
 
 exportBtn.addEventListener("click", exportScan);
+
+colorModeCheckbox.addEventListener("change", () => {
+  if (lastScan) renderCurrentView();
+});
 
 if (nativeApi?.isNative) {
   statusMessage.textContent = "Choose a folder to scan.";
@@ -261,6 +268,20 @@ function renderScan(scan) {
   exportBtn.disabled = false;
 }
 
+function getCurrentPalette() {
+  if (!colorModeCheckbox.checked) return palette;
+  return { directory: dirPalette, file: filePalette };
+}
+
+function pickColor(index, itemType) {
+  const p = getCurrentPalette();
+  if (colorModeCheckbox.checked && (itemType === "directory" || itemType === "file")) {
+    const arr = itemType === "directory" ? p.directory : p.file;
+    return arr[index % arr.length];
+  }
+  return p[index % p.length];
+}
+
 function renderCurrentView() {
   if (!lastScan) return;
 
@@ -268,7 +289,7 @@ function renderCurrentView() {
   const total = rawItems.reduce((sum, item) => sum + item.sizeBytes, 0);
   const items = rawItems.map((item, index) => ({
     ...item,
-    color: palette[index % palette.length],
+    color: pickColor(index, item.type),
   }));
 
   itemCount.textContent = `${items.length} ${items.length === 1 ? "item" : "items"}`;

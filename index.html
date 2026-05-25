@@ -63,6 +63,20 @@
             <h2>Largest Items</h2>
             <span id="item-count">0 items</span>
           </div>
+          <div class="filter-bar">
+            <input
+              id="filter-input"
+              class="filter-input"
+              type="text"
+              placeholder="Filter items..."
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <label class="color-mode-toggle" title="Color by directory/file type">
+              <input id="color-mode-checkbox" type="checkbox" />
+              <span class="color-mode-label">By type</span>
+            </label>
+          </div>
           <p id="status-message" class="status-message" role="status"></p>
           <ol id="usage-list" class="usage-list"></ol>
           <ul id="warning-list" class="warning-list" aria-label="Scan warnings"></ul>

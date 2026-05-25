@@ -197,6 +197,53 @@ h2 {
   color: #667085;
 }
 
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.filter-input {
+  flex: 1;
+  min-width: 0;
+  min-height: 32px;
+  border: 1px solid #cfd6e0;
+  border-radius: 8px;
+  padding: 0 10px;
+  color: #1f2933;
+  background: #ffffff;
+  font: inherit;
+  font-size: 0.85rem;
+}
+
+.filter-input:focus {
+  outline: none;
+  border-color: #1f2933;
+}
+
+.color-mode-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.color-mode-toggle input {
+  width: 16px;
+  height: 16px;
+  accent-color: #1f2933;
+  cursor: pointer;
+}
+
+.color-mode-label {
+  color: #667085;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
 .tooltip {
   position: absolute;
   z-index: 10;
@@ -502,6 +549,10 @@ h2 {
 
   .details-panel {
     max-height: none;
+  }
+
+  .filter-bar {
+    flex-wrap: wrap;
   }
 }
 
